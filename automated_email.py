@@ -13,7 +13,7 @@ smtp_password = os.getenv("SMTP_PASSWORD")
 
 def send_email(to_email, subject, body):
     try:
-        # Create email message
+        # Create email message body
         msg = MIMEText(body)
         msg['Subject'] = subject
         msg['From'] = smtp_email
