@@ -10,8 +10,8 @@ class fitnessprofile(BaseModel):
     height: str
     year_old: str
 
-class activity_summary(BaseModel):
-    
+# class activity_summary(BaseModel):
+
 
 #Now make api for selecting gender, weight, height etc
 @app.post("/fitness_profile")
@@ -23,8 +23,8 @@ async def fitness_profile(data: fitnessprofile):
     goal = data.goal
     activity_level =data.activity_level
 #Now make api for getting user data
-@app.post("/activity_summary")
-async def fitness_data(data: activity_summary):
+# @app.post("/activity_summary")
+# async def fitness_data(data: activity_summary):
 
 
 
