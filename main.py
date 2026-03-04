@@ -6,11 +6,14 @@ import secrets
 import hashlib # For hashing passwords
 import smtplib # For sending emails
 import os
+from dotenv import load_dotenv
 from automated_email import send_email
 
-# MongoDB connection string (local)
-connection_string = "mongodb://localhost:27017"
-DB_NAME = "maxfit-ai"
+load_dotenv()
+
+# MongoDB atlas connection string
+connection_string = os.getenv("MONGO_URI")
+DB_NAME = "Cluster1"
 
 # Create async client and database
 client = motor_asyncio.AsyncIOMotorClient(connection_string)

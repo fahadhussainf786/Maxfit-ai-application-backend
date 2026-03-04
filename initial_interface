@@ -1,0 +1,26 @@
+from fastapi import fastapi
+from pydantic import BaseModel
+
+app = fastapi()
+
+class fitnessprofile(BaseModel):
+    gender: str
+    year_old: str
+    weight: str
+    height: str
+    year_old: str
+
+#Now make api for selecting gender, weight, height etc
+@app.post("/fitness_profile")
+async def fitness_profile(data: fitnessprofile ):
+    gender = data.gender
+    year_old = data.year_old
+    weight = data.weight
+    height = data.height
+    goal = data.goal
+    activity_level =data.activity_level
+
+
+
+
+
