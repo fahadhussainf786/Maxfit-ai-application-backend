@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from motor import motor_asyncio  # MongoDB async driver
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 import os
 from dotenv import load_dotenv
 import datetime
@@ -64,6 +62,7 @@ async def get_activity_summary(email: str):
     # Find today's activity for this user
     activity = await db.activities.find_one({"user_email": email, "date": today})
     
+    activity = await db.users
     if not activity:
         return {"success": True, "data": {"calories": 0, "steps": 0}}
     

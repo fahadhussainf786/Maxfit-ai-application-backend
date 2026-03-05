@@ -2,8 +2,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from motor import motor_asyncio  # MongoDB async driver
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 import secrets 
 import hashlib # For hashing passwords
 import os
