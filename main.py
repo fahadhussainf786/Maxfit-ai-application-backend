@@ -53,6 +53,14 @@ class fitnessprofile(BaseModel):
     goal: str
     activity_level: str
 
+# Model for activity
+class ActivityRequest(BaseModel):
+    email: str
+    calories: int
+    steps: int
+
+
+
 #Signup api
 @app.post("/signup")
 async def signup(data: SignupRequest):
@@ -212,4 +220,49 @@ async def fitness_profile(data: fitnessprofile):
         
     return {'success': True, 'message': 'fitness profile saved successfully'}
 
-        
+# Activity APIs
+@app.post("/activity")
+async def log_activity(data: ActivityRequest):
+    email = data.email
+    calories = data.calories
+    steps = data.steps
+    
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    existing = await db.activities.find_one({"user_email": email, "date": today})
+    
+    if existing:
+        await db.activities.update_one(
+            {"user_email": email, "date": today},
+            {"$set": {"calories": calories, "steps": steps}}
+        )
+    else:
+        await db.activities.insert_one({
+            "user_email": email,
+            "date": today,
+            "calories": calories,
+            "steps": steps
+        })
+    
+    return {"success": True, "message": "Activity logged successfully"}
+
+#Get activity summary for 
+@app.get("/activity/summary")
+async def get_activity_summary(email: str):
+    # Get today's date
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    # Find today's activity for this user
+    activity = await db.activities.find_one({"user_email": email, "date": today})
+    
+    activity = await db.users
+    if not activity:
+        return {"success": True, "data": {"calories": 0, "steps": 0}}
+    
+    return {
+        "success": True,
+        "data": {
+            "calories": activity["calories"],
+            "steps": activity["steps"]
+        }
+    }

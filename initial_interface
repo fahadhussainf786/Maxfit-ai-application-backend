@@ -26,53 +26,6 @@ class ActivityRequest(BaseModel):
     steps: int
 
 
-#now make api for post activity
-@app.post("/activity")
-async def save_activity(data: ActivityRequest):
-    email = data.email
-    calories = data.calories
-    steps = data.steps
-
-    #Get today activity
-    today = datetime.now().strftime("%Y-%m-%d")
-
-    #existing data
-    existing = await db.activities.find_one({"user_email": email, "date": today})
-
-    if existing:
-        await db.activities.update_one({'user_email': email, 'date': today},
-                                       {"$set": {"calories": calories, "steps": steps}})
-
-    else:
-        await db.activities.insert_one({
-            "user_email": email,
-            "date": today,
-            "calories": calories,
-            "steps": steps
-        })
-    
-    return {"success": True, "message": "Activity logged successfully"}
-
-# GET /activity/summary - Get today's activity for a user
-@app.get("/activity/summary")
-async def get_activity_summary(email: str):
-    # Get today's date
-    today = datetime.now().strftime("%Y-%m-%d")
-    
-    # Find today's activity for this user
-    activity = await db.activities.find_one({"user_email": email, "date": today})
-    
-    activity = await db.users
-    if not activity:
-        return {"success": True, "data": {"calories": 0, "steps": 0}}
-    
-    return {
-        "success": True,
-        "data": {
-            "calories": activity["calories"],
-            "steps": activity["steps"]
-        }
-    }
 
         
 
