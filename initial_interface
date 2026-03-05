@@ -1,31 +1,83 @@
-from fastapi import fastapi
+from fastapi import FastAPI
 from pydantic import BaseModel
+from motor import motor_asyncio  # MongoDB async driver
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+import os
+from dotenv import load_dotenv
+import datetime
 
-app = fastapi()
+# MongoDB atlas connection string
+connection_string = os.getenv("MONGO_URI")
+DB_NAME = "Cluster1"
 
-class fitnessprofile(BaseModel):
-    gender: str
-    year_old: str
-    weight: str
-    height: str
-    year_old: str
+# Create async client and database
+client = motor_asyncio.AsyncIOMotorClient(connection_string)
+db = client[DB_NAME]
 
-# class activity_summary(BaseModel):
+app = FastAPI()
+
+class activity_summary(BaseModel):
+    calories: str
+    steps: str
+
+# Model for activity - stores calories and steps
+class ActivityRequest(BaseModel):
+    email: str
+    calories: int
+    steps: int
 
 
-#Now make api for selecting gender, weight, height etc
-@app.post("/fitness_profile")
-async def fitness_profile(data: fitnessprofile):
-    gender = data.gender
-    year_old = data.year_old
-    weight = data.weight
-    height = data.height
-    goal = data.goal
-    activity_level =data.activity_level
-#Now make api for getting user data
-# @app.post("/activity_summary")
-# async def fitness_data(data: activity_summary):
+#now make api for post activity
+@app.post("/activity")
+async def save_activity(data: ActivityRequest):
+    email = data.email
+    calories = data.calories
+    steps = data.steps
 
+    #Get today activity
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    #existing data
+    existing = await db.activities.find_one({"user_email": email, "date": today})
+
+    if existing:
+        await db.activities.update_one({'user_email': email, 'date': today},
+                                       {"$set": {"calories": calories, "steps": steps}})
+
+    else:
+        await db.activities.insert_one({
+            "user_email": email,
+            "date": today,
+            "calories": calories,
+            "steps": steps
+        })
+    
+    return {"success": True, "message": "Activity logged successfully"}
+
+# GET /activity/summary - Get today's activity for a user
+@app.get("/activity/summary")
+async def get_activity_summary(email: str):
+    # Get today's date
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    # Find today's activity for this user
+    activity = await db.activities.find_one({"user_email": email, "date": today})
+    
+    if not activity:
+        return {"success": True, "data": {"calories": 0, "steps": 0}}
+    
+    return {
+        "success": True,
+        "data": {
+            "calories": activity["calories"],
+            "steps": activity["steps"]
+        }
+    }
+
+        
+
+        
 
 
 

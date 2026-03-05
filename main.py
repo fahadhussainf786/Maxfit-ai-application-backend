@@ -7,6 +7,7 @@ from pymongo.server_api import ServerApi
 import secrets 
 import hashlib # For hashing passwords
 import os
+from datetime import datetime  # For activity date
 from dotenv import load_dotenv
 from automated_email import send_email
 
@@ -43,6 +44,16 @@ class ResetPasswordRequest(BaseModel):
     email: str
     reset_token: str
     new_password: str
+
+# Model for fitness profile
+class fitnessprofile(BaseModel):
+    email: str
+    gender: str
+    year_old: int
+    weight: float
+    height: float
+    goal: str
+    activity_level: str
 
 #Signup api
 @app.post("/signup")
@@ -85,7 +96,6 @@ async def signup(data: SignupRequest):
             "user_id": str(result.inserted_id)
     }
 
-
 #Login api
 @app.post("/login")
 async def login(data: LoginRequest):
@@ -108,7 +118,6 @@ async def login(data: LoginRequest):
 
     return {"message": "Login successful", 
             "username": user["username"]}
-
 
 # Forget password api
 @app.post("/forgotpassword")
@@ -169,3 +178,40 @@ async def reset_password(data: ResetPasswordRequest):
 @app.get("/")
 async def root():
     return {"message": "MaxFit AI API is running"}
+
+
+@app.post("/fitness_profile")
+async def fitness_profile(data: fitnessprofile):
+
+    email = data.email
+    gender = data.gender
+    year_old = data.year_old
+    weight = data.weight
+    height = data.height
+    goal = data.goal
+    activity_level = data.activity_level
+
+    #Now we will save the fitness_profile 
+    existing = await db.fitness_profile.find_one({'user_email': email})
+
+    if existing:
+        await db.fitness_profile.update_one({"email": email},
+                {"$Set": {'gender': gender,
+                'year_old': year_old,
+                'weight': weight,
+                'height': height,
+                'goal': goal,
+                'activity_level': activity_level}})
+    else:
+        await db.fitness_profile.insert_one({
+                'email': email,
+                'gender': gender,
+                'year_old': year_old,
+                'weight': weight,
+                'height': height,
+                'goal': goal,
+                'activity_level': activity_level})
+        
+    return {'success': True, 'message': 'fitness profile saved successfully'}
+
+        
